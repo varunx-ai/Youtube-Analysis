@@ -1,0 +1,4 @@
+import {NextRequest,NextResponse} from "next/server";
+import {analyseTranscript,saveTranscript,transcriptFor} from "../../../lib/transcripts";
+import type {ResearchVideo} from "../../../lib/types";
+export async function POST(req:NextRequest){try{const b=await req.json() as {video?:ResearchVideo;text?:string};if(!b.video)return NextResponse.json({error:"Choose a video."},{status:400});let t=transcriptFor(b.video.id);if(b.text?.trim())t=saveTranscript(b.video,b.text,"manual");if(!t)return NextResponse.json({error:"Paste/import a transcript for this video first."},{status:400});return NextResponse.json({transcript:{...t,text:undefined},analysis:await analyseTranscript(b.video,t)});}catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Transcript analysis failed."},{status:500})}}

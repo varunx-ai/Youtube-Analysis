@@ -12,7 +12,8 @@
     "start": "next start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:knowledge": "node --experimental-strip-types --test tests/knowledge.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

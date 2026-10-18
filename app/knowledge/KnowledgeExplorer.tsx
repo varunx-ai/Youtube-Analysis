@@ -40,7 +40,13 @@ export default function KnowledgeExplorer() {
     if (!r.ok) throw new Error(body.error || 'Unable to get index status');
     setStatus(body);
   }
-  useEffect(()=>{void refresh().catch(e=>setError(e instanceof Error?e.message:'Unable to load index'))},[]);
+  useEffect(()=>{
+    const fromURL = new URLSearchParams(window.location.search).get('q')?.trim();
+    const initialQuery = fromURL && fromURL.length >= 2 ? fromURL : 'marathon training';
+    setQuery(initialQuery);
+    // Search builds an index on demand. No separate indexing step required.
+    void doSearch(initialQuery, false);
+  },[]);
   async function sync() {
     setLoading(true);setError('');
     try {
@@ -60,7 +66,7 @@ export default function KnowledgeExplorer() {
       const r=await fetch(`/api/knowledge/search?${params}`,{cache:'no-store'});
       const body=await r.json() as SearchResponse;
       if(!r.ok)throw new Error(body.error||'Search failed');
-      setHits(body.hits);setSearched(q);
+      setHits(body.hits);setSearched(q);await refresh();
     }catch(e){setError(e instanceof Error?e.message:'Search failed')}
     finally{setBusy(false)}
   }
@@ -69,14 +75,15 @@ export default function KnowledgeExplorer() {
     <div className={styles.wrap}>
       <a className={styles.back} href="/"><ArrowLeft size={15}/> Back to research workspace</a>
       <div className={styles.hero}>
-        <div className={styles.eyebrow}><BookOpenText size={16}/> CONTENT KNOWLEDGE / PHASE 1</div>
-        <h1>Search what your evidence actually says.</h1>
-        <p>Timestamp-aware passages from supplied transcripts and research notes. No invented video analysis, embeddings, or audience claims.</p>
+        <div className={styles.eyebrow}><BookOpenText size={16}/> SEARCH / SAVED RESEARCH</div>
+        <h1>Find evidence in your workspace.</h1>
+        <p>Search across your saved source notes and supplied transcripts. The index is built automatically when needed, and each result links to its original source.</p>
+        <a href="/search" className={styles.discoverLink}>Looking for new videos? Search YouTube <ExternalLink size={15}/></a>
       </div>
       <section className={styles.panel} aria-label="Index status">
         <div className={styles.panelHead}>
           <div><strong>Local evidence index</strong><span>{status?.generatedAt ? `Last indexed ${new Date(status.generatedAt).toLocaleString()}` : 'Not indexed yet'}</span></div>
-          <button className={styles.primary} type="button" disabled={loading} onClick={()=>void sync()}><RefreshCw size={15}/>{loading?'Indexing…':status?.indexed?'Refresh index':'Index workspace'}</button>
+          <button className={styles.primary} type="button" disabled={loading} onClick={()=>void sync()}><RefreshCw size={15}/>{loading?'Refreshing…':'Refresh index'}</button>
         </div>
         <div className={styles.metrics}>
           <div><strong>{status?.indexedSources ?? '—'}</strong><span>Indexed sources</span></div>
@@ -88,9 +95,10 @@ export default function KnowledgeExplorer() {
       </section>
       <section className={styles.panel} aria-label="Evidence search">
         <form className={styles.searchForm} onSubmit={submit}>
-          <label htmlFor="knowledge-query">Search across indexed source material</label>
-          <div className={styles.searchRow}><input id="knowledge-query" minLength={2} maxLength={300} required value={query} onChange={e=>setQuery(e.target.value)} placeholder="e.g. fuelling for long runs"/><button className={styles.primary} type="submit" disabled={busy||!status?.indexed}><Search size={16}/>{busy?'Searching…':'Search evidence'}</button></div>
-          <label className={styles.checkbox}><input type="checkbox" checked={reviewedOnly} onChange={e=>setReviewedOnly(e.target.checked)}/> Reviewed sources only</label>
+          <label htmlFor="knowledge-query">Search saved notes and transcripts</label>
+          <div className={styles.searchRow}><input id="knowledge-query" minLength={2} maxLength={300} required value={query} onChange={e=>setQuery(e.target.value)} placeholder="e.g. fuelling for long runs"/><button className={styles.primary} type="submit" disabled={busy}><Search size={16}/>{busy?'Searching…':'Search knowledge'}</button></div>
+          <p className={styles.searchHint}>Type your question and press Enter. No manual indexing is required.</p>
+          <label className={styles.checkbox}><input type="checkbox" checked={reviewedOnly} onChange={e=>{setReviewedOnly(e.target.checked);if(searched)void doSearch(searched,e.target.checked)}}/> Reviewed sources only</label>
         </form>
       </section>
       {error && <p className={styles.error} role="alert">{error}</p>}
@@ -104,7 +112,7 @@ export default function KnowledgeExplorer() {
         </article>)}
         {!hits.length&&<p className={styles.empty}>No matching evidence was found. Try different keywords or add more source transcripts in Market Evidence.</p>}
       </section>}
-      <p className={styles.note}>Local development only. Excluded sources are omitted. Timestamp labels appear only when present in the supplied source. The current implementation is lexical search; embeddings and semantic RAG are future work.</p>
+      <p className={styles.note}>Local development only. Search covers saved material, not all of YouTube. Excluded sources are omitted. Timestamp labels appear only when present in the supplied source. The current implementation is lexical search; embeddings and semantic RAG are future work.</p>
     </div>
   </main>;
 }

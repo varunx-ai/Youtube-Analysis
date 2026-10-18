@@ -20,3 +20,7 @@
 .hit h3{font-size:17px;margin:0 0 7px}.channel{color:#9db1a5;font-size:12px;margin:0 0 14px}.excerpt{font-size:14px;line-height:1.65;color:#d1dcd3;white-space:pre-wrap}.hitFooter{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:#90a699;margin-top:15px}.hitFooter a{display:flex;align-items:center;gap:6px;color:#d6eaaa;text-decoration:none}.hitFooter a:hover{text-decoration:underline}
 .empty{color:#b0c4b6;background:#1a2926;padding:24px;border-radius:7px}.note{font-size:12px;line-height:1.6;color:#8ca094;margin-top:28px}
 @media(max-width:620px){.page{padding:25px 15px 60px}.metrics{grid-template-columns:repeat(2,1fr)}.searchRow{flex-direction:column}.searchRow button{width:100%}.hitFooter{align-items:flex-start;flex-direction:column}.panel{padding:17px}.hit{padding:18px}}
+
+.discoverLink{display:inline-flex;align-items:center;gap:8px;color:#d7eea9;background:#283f32;border:1px solid #50684d;border-radius:8px;padding:11px 14px;margin-top:12px;font-size:13px;font-weight:700;text-decoration:none}
+.discoverLink:hover{background:#314d3a}
+.searchHint{font-size:12px;color:#9cad9e;margin:12px 0 0}

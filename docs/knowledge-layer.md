@@ -6,14 +6,14 @@ This milestone makes existing Channel Scout source material **searchable without
 
 ```
 Workspace stored in .local-data/workspace.json (or starter seed)
-   → Explicit POST /api/knowledge/sync
+   → On-demand indexing on first search (or explicit refresh POST /api/knowledge/sync)
    → Per-source SHA-256 fingerprint + incremental chunking
    → Versioned, atomic .local-data/knowledge-index-v1.json
    → GET /api/knowledge/search?q=...
    → Ranked source-linked excerpts (lexical BM25)
 ```
 
-Open `/knowledge` through the link in the research workspace to index and search. The JSON index is gitignored. Re-index after changes; `/api/knowledge/status` indicates staleness relative to the workspace revision. `GET /api/knowledge/search` accepts `q`, `limit` (max 30), `topic`, `channel`, and `reviewed=true`.
+Open `/knowledge` from the primary navigation to search saved research immediately. Search automatically updates the index when needed; optional manual refresh is available. For new YouTube videos use `/search`, which uses the YouTube Data API if configured. The JSON index is gitignored. Re-index after changes; `/api/knowledge/status` indicates staleness relative to the workspace revision. `GET /api/knowledge/search` accepts `q`, `limit` (max 30), `topic`, `channel`, and `reviewed=true`.
 
 Each chunk retains its source ID, source link, source type, review status, content type (`research_notes` vs `supplied_transcript`), timestamp when supplied, ordinal position, and estimated tokens. It keeps the source text: summaries are **not** substitutes for original evidence. Only `decision=exclude` is automatically skipped, and unreviewed material remains labeled as unreviewed.
 

@@ -32,6 +32,16 @@ export function synchronizeKnowledge() {
   return result;
 }
 
+/** Search reads a current index, building it when absent or outdated.
+ * This makes search immediately usable without a manual first-run action. */
+export async function currentKnowledgeIndex() {
+  const { revision } = await activeWorkspace();
+  const index = await loadIndex();
+  if (index.workspaceRevision === revision) return index;
+  await synchronizeKnowledge();
+  return loadIndex();
+}
+
 export async function knowledgeStatus() {
   const [{ workspace, revision }, index] = await Promise.all([activeWorkspace(), loadIndex()]);
   return {
